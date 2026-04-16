@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Kias_Kar_Kompany.Data;
 using Microsoft.AspNetCore.Mvc;
-using Kias_Kar_Kompany.Data;
-using Kias_Kar_Kompany.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.InteropServices;
+using Kias_Kar_Kompany.Models;
 
 namespace Kias_Kar_Kompany.Controllers
 {
@@ -32,10 +30,12 @@ namespace Kias_Kar_Kompany.Controllers
 
             var vehicle = await _context.Vehicle
                 .FirstOrDefaultAsync(m => m.VehicleId == id);
+
             if (vehicle == null)
             {
                 return NotFound();
             }
+
             return View(vehicle);
         }
 
@@ -48,7 +48,7 @@ namespace Kias_Kar_Kompany.Controllers
         // POST: VehiclesController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("VehicleId, VehicleName, VehicleModel, VehiclePrice, VehicleType, VehicleImageURL")] Vehicle vehicle)
+        public async Task<IActionResult> Create(Vehicle vehicle)
         {
             if (ModelState.IsValid)
             {
@@ -60,10 +60,81 @@ namespace Kias_Kar_Kompany.Controllers
         }
 
         // GET: VehiclesController/Edit/5
-        
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var vehicle = await _context.Vehicle.FindAsync(id);
+
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            return View(vehicle);
+        }
+
+        // POST: VehiclesController/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Vehicle vehicle)
+        {
+            if (id != vehicle.VehicleId)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                _context.Update(vehicle);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(vehicle);
+        }
+
+        // GET: VehiclesController/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var vehicle = await _context.Vehicle
+                .FirstOrDefaultAsync(m => m.VehicleId == id);
+
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            return View(vehicle);
+        }
+
+        // POST: VehiclesController/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var vehicle = await _context.Vehicle.FindAsync(id);
+
+            if (vehicle != null)
+            {
+                _context.Vehicle.Remove(vehicle);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Helper method
         private bool VehicleExists(int id)
         {
-            return _context.Vehicle.Any(e => e.VehicleId == id );
+            return _context.Vehicle.Any(e => e.VehicleId == id);
         }
     }
 }
